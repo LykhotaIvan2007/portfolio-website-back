@@ -19,8 +19,18 @@ from django.urls import path, include
 from rest_framework import routers
 from information.views import *
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
-    path('api/test/', TestRetrieveInfo.as_view())
+    path('api/getprojects/', RetrieveProjects.as_view()),
+    path('api/getdocs/', RetrieveDocs.as_view())
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )

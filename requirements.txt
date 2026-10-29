@@ -3,5 +3,6 @@ Django==5.2.18
 djangorestframework==3.18.3
 gunicorn==23.0.0
 sqlparse==0.6.0
+Pillow==13.0.0
 django-cors-headers
 psycopg[binary]

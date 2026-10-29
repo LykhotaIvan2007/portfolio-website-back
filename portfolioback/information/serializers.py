@@ -1,20 +1,12 @@
 from rest_framework import serializers
-from .models import Test
+from .models import Projects, Documents
 
-class TestSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
-
+class ProjectsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Test
-        fields = "__all__"  # ("title", "content", "cat")
+        model = Projects
+        fields = "__all__"
 
-class TestSerializerForOneField(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
-
+class DocsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Test
-        fields = ("title", "user") # ("title", "content", "cat")
+        model = Documents
+        fields = "__all__"
