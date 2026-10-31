@@ -37,6 +37,9 @@ WORKDIR /app
 # Copy application code
 COPY --chown=appuser:appuser . .
 
+RUN mkdir -p /app/portfolioback/staticfiles /app/portfolioback/media && \
+    chown -R appuser:appuser /app/portfolioback/staticfiles /app/portfolioback/media
+
 # Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -48,4 +51,4 @@ USER appuser
 EXPOSE 8000
 
 # Start the application using Gunicorn
-CMD ["gunicorn", "--chdir", "/app/portfolioback", "--bind", "0.0.0.0:8000", "--workers", "3", "portfolioback.wsgi:application"]
+CMD ["gunicorn", "--chdir", "/app/portfolioback", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-logfile", "-", "--error-logfile", "-", "portfolioback.wsgi:application"]

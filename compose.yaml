@@ -1,40 +1,81 @@
+#services:
+# db:
+ #  image: postgres:17
+  # environment:
+   #  POSTGRES_DB: ${DATABASE_NAME}
+    # POSTGRES_USER: ${DATABASE_USERNAME}
+     #POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+   #ports:
+    # - "5432:5432"
+   #volumes:
+    # - postgres_data:/var/lib/postgresql/data
+   #env_file:
+    # - .env
+
+ #django-web:
+  # build: .
+   #container_name: django-docker
+   #ports:
+    # - "8000:8000"
+   #volumes:
+    # - ./portfolioback:/app/portfolioback
+   #command: python /app/portfolioback/manage.py runserver 0.0.0.0:8000
+   #depends_on:
+    # - db
+   #environment:
+    # DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+     #DEBUG: ${DEBUG}
+     #DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
+     #DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+     #DATABASE_ENGINE: ${DATABASE_ENGINE}
+     #DATABASE_NAME: ${DATABASE_NAME}
+     #DATABASE_USERNAME: ${DATABASE_USERNAME}
+
+     #DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+     #DATABASE_HOST: ${DATABASE_HOST}
+     #DATABASE_PORT: ${DATABASE_PORT}
+   #env_file:
+     #- .env
+#volumes:
+   #postgres_data:
+
 services:
- db:
-   image: postgres:17
-   environment:
-     POSTGRES_DB: ${DATABASE_NAME}
-     POSTGRES_USER: ${DATABASE_USERNAME}
-     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-   ports:
-     - "5432:5432"
-   volumes:
-     - postgres_data:/var/lib/postgresql/data
-   env_file:
-     - .env
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
- django-web:
-   build: .
-   container_name: django-docker
-   ports:
-     - "8000:8000"
-   volumes:
-     - ./portfolioback:/app/portfolioback
-   command: python /app/portfolioback/manage.py runserver 0.0.0.0:8000
-   depends_on:
-     - db
-   environment:
-     DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-     DEBUG: ${DEBUG}
-     DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
-     DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
-     DATABASE_ENGINE: ${DATABASE_ENGINE}
-     DATABASE_NAME: ${DATABASE_NAME}
-     DATABASE_USERNAME: ${DATABASE_USERNAME}
+  django-web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./portfolioback/media:/app/portfolioback/media
+      - static_data:/app/portfolioback/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_ENGINE: postgresql
+      DATABASE_HOST: db
+      DATABASE_PORT: "5432"
 
-     DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-     DATABASE_HOST: ${DATABASE_HOST}
-     DATABASE_PORT: ${DATABASE_PORT}
-   env_file:
-     - .env
 volumes:
-   postgres_data:
+  postgres_data:
+  static_data:
